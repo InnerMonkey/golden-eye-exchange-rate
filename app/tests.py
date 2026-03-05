@@ -2,6 +2,7 @@ import unittest
 
 import test_api
 import models
+import privatbank_api
 
 class Test(unittest.TestCase):
     def setUp(self):
@@ -16,6 +17,17 @@ class Test(unittest.TestCase):
         updated_after = xrate.updated
 
         self.assertEqual(xrate.rate, 20.01)
+        self.assertGreater(updated_after, updated_before)
+    
+    def test_privat(self):
+        xrate = models.XRate.get(id = 1)
+        updated_before = xrate.updated
+        self.assertEqual(xrate.rate, 20)
+        privatbank_api.update_xrates(840, 980)
+        xrate = models.XRate.get(id = 1)
+        updated_after = xrate.updated
+
+        self.assertGreater(xrate.rate, 25)
         self.assertGreater(updated_after, updated_before)
 
 if __name__ == '__main__':
