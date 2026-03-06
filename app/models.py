@@ -24,4 +24,5 @@ def init_db():
     db.drop_tables([XRate])
     XRate.create_table()
     XRate.create(from_currency=840, to_currency=980, rate=20)
+    XRate.create(from_currency=978, to_currency=980, rate=45)
     print("db created!")
