@@ -13,7 +13,7 @@ class Api(_Api):
         return rate
 
     def _get_nbu_rate(self, from_currency):
-        response = requests.get("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?xml")
+        response = self._send_request(url="https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?xml", method="get")
         self.log.debug("response.encoding: %s", response.encoding)
         response_text = response.text
         self.log.debug("response.text: %s", response_text)
