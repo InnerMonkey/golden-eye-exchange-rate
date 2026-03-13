@@ -1,5 +1,5 @@
 from peewee import (SqliteDatabase, Model, IntegerField, DoubleField,
-                    DateTimeField, datetime as peewee_datetime, CharField, TextField)
+                    DateTimeField, CharField, TextField, datetime as peewee_datetime)
 from config import DB_NAME
 
 db = SqliteDatabase(DB_NAME)
