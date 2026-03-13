@@ -1,4 +1,4 @@
-from config import logging, LOGGER_CONFIG
+from config import logging, LOGGER_CONFIG, HTTP_TIMEOUT
 import requests, traceback
 from models import XRate, ApiLog, ErrorLog, peewee_datetime
 
@@ -48,4 +48,4 @@ class _Api:
 
 
     def _send(self, url, method, data = None, headers = None):
-        return requests.request(method = method, url = url, headers = headers, data = data, timeout = 15)
+        return requests.request(method = method, url = url, headers = headers, data = data, timeout = HTTP_TIMEOUT)
