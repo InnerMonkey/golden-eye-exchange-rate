@@ -34,6 +34,12 @@ class Test(unittest.TestCase):
         self.assertEqual(xrate.rate, 20.01)
         self.assertGreater(updated_after, updated_before)
 
+    def test_privat_currency_error(self):
+        xrate = models.XRate.get(id=1)
+        self.assertEqual(xrate.rate, 20)
+
+        self.assertRaises(ValueError, privatbank_api.Api().update_rate, 978, 980)
+
     def test_privat_usd(self):
 
         xrate = models.XRate.get(id = 1)
