@@ -21,8 +21,10 @@ class Api(_Api):
     def _find_rate(self, response_data, from_currency):
         privat_aliases_map = {840: "USD",
                               1000: "BTC"}
+        if from_currency not in privat_aliases_map:
+            raise ValueError(f"Invalid from_currency: {from_currency}")
+        
         currency_alias = privat_aliases_map[from_currency]
-
         for el in response_data:
             if el["ccy"] == currency_alias:
                 return float(el["sale"])
