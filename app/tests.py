@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         self.assertEqual(xrate.rate, 20.01)
         self.assertGreater(updated_after, updated_before)
 
-    def test_privat(self):
+    def test_privat_usd(self):
 
         xrate = models.XRate.get(id = 1)
         updated_before = xrate.updated
@@ -56,8 +56,25 @@ class Test(unittest.TestCase):
 
         self.assertIn('{"ccy":"USD","base_ccy":"UAH",', api_log.response_text)
 
+    def test_privat_btc(self):
 
+        xrate = models.XRate.get(from_currency=1000, to_currency=840)
+        updated_before = xrate.updated
+        self.assertEqual(xrate.rate, 1.0)
 
+        privatbank_api.Api().update_rate(1000, 840)
+
+        xrate = models.XRate.get(from_currency=1000, to_currency=840)
+        updated_after = xrate.updated
+
+        self.assertGreater(xrate.rate, 5000)
+        self.assertGreater(updated_after, updated_before)
+
+        api_log = models.ApiLog.select().order_by(models.ApiLog.created.desc()).first()
+
+        self.assertIsNotNone(api_log)
+        self.assertEqual(api_log.request_url, "https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11")
+        
     def test_nbu(self):
         xrate = models.XRate.get(from_currency = 978, to_currency = 980)
         updated_before = xrate.updated
