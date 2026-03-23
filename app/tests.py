@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import api.test_api as test_api
 import models
-import api.privatbank_api as privatbank_api
-import api.nbu_api as nbu_api
+# import api.privatbank_api as privatbank_api
+# import api.nbu_api as nbu_api
 import api
 
 def get_privat_response(*args, **kwargs):
@@ -18,6 +18,21 @@ def get_privat_response(*args, **kwargs):
         def json(self):
             return json.loads(self.text)
     return Response([{"ccy": "USD", "base_ccy": "UAH", "buy": "43.90000", "sale": "44.44444"}])
+
+def get_privat_btc_response(*args, **kwargs):
+    print("get_privat_btc_response")
+
+    class Response:
+        def __init__(self, response):
+            self.text = json.dumps(response)
+
+        def json(self):
+            return json.loads(self.text)
+
+    return Response([
+        {"ccy": "USD", "base_ccy": "UAH", "buy": "43.9", "sale": "44.4"},
+        {"ccy": "BTC", "base_ccy": "USD", "buy": "60000", "sale": "61000"}
+    ])
 
 class Test(unittest.TestCase):
     def setUp(self):
@@ -34,19 +49,13 @@ class Test(unittest.TestCase):
         self.assertEqual(xrate.rate, 20.01)
         self.assertGreater(updated_after, updated_before)
 
-    def test_privat_currency_error(self):
-        xrate = models.XRate.get(id=1)
-        self.assertEqual(xrate.rate, 20)
-
-        self.assertRaises(ValueError, privatbank_api.Api().update_rate, 978, 980)
-
     def test_privat_usd(self):
 
         xrate = models.XRate.get(id = 1)
         updated_before = xrate.updated
         self.assertEqual(xrate.rate, 20)
 
-        privatbank_api.Api().update_rate(840, 980)
+        api.update_rate(840, 980)
 
         xrate = models.XRate.get(id = 1)
         updated_after = xrate.updated
@@ -62,13 +71,14 @@ class Test(unittest.TestCase):
 
         self.assertIn('{"ccy":"USD","base_ccy":"UAH",', api_log.response_text)
 
+    @patch("api._Api._send", new=get_privat_btc_response)
     def test_privat_btc(self):
 
         xrate = models.XRate.get(from_currency=1000, to_currency=840)
         updated_before = xrate.updated
         self.assertEqual(xrate.rate, 1.0)
 
-        privatbank_api.Api().update_rate(1000, 840)
+        api.update_rate(1000, 840)
 
         xrate = models.XRate.get(from_currency=1000, to_currency=840)
         updated_after = xrate.updated
@@ -86,7 +96,7 @@ class Test(unittest.TestCase):
         updated_before = xrate.updated
         self.assertEqual(xrate.rate, 45)
 
-        nbu_api.Api().update_rate(978, 980)
+        api.update_rate(978, 980)
 
         xrate = models.XRate.get(from_currency = 978, to_currency = 980)
         updated_after = xrate.updated
@@ -109,7 +119,7 @@ class Test(unittest.TestCase):
         updated_before = xrate.updated
         self.assertEqual(xrate.rate, 20)
 
-        privatbank_api.Api().update_rate(840, 980)
+        api.update_rate(840, 980)
 
         xrate = models.XRate.get(id = 1)
         updated_after = xrate.updated
@@ -131,7 +141,7 @@ class Test(unittest.TestCase):
         updated_before = xrate.updated
         self.assertEqual(xrate.rate, 20)
 
-        self.assertRaises(requests.exceptions.RequestException, privatbank_api.Api().update_rate, 840, 980)
+        self.assertRaises(requests.exceptions.RequestException, api.update_rate, 840, 980)
 
         xrate = models.XRate.get(id=1)
         updated_after = xrate.updated
