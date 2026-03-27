@@ -1,3 +1,4 @@
+from flask import request
 from app import app
 import controllers
 
@@ -8,4 +9,8 @@ def hello():
 
 @app.route("/xrates")
 def view_rates():
-    return controllers.get_all_rates()
+    return controllers.ViewAllRates().call()
+
+@app.route("/api/xrates/<fmt>")
+def api_rates(fmt):
+    return controllers.ViewAllRates().call(fmt)
