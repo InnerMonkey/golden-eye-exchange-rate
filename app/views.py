@@ -13,4 +13,4 @@ def view_rates():
 
 @app.route("/api/xrates/<fmt>")
 def api_rates(fmt):
-    return controllers.ViewAllRates().call(fmt)
+    return controllers.GetApiRates().call(fmt)
