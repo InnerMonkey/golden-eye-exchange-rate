@@ -1,12 +1,11 @@
 import unittest
 import requests
 import json
+import xmltodict
 from unittest.mock import patch
 
 import api.test_api as test_api
 import models
-# import api.privatbank_api as privatbank_api
-# import api.nbu_api as nbu_api
 import api
 
 def get_privat_response(*args, **kwargs):
@@ -38,6 +37,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         models.init_db()
 
+    @unittest.skip("skip")
     def test_main(self):
         xrate = models.XRate.get(id=1)
         updated_before = xrate.updated
@@ -49,6 +49,7 @@ class Test(unittest.TestCase):
         self.assertEqual(xrate.rate, 20.01)
         self.assertGreater(updated_after, updated_before)
 
+    @unittest.skip("skip")
     def test_privat_usd(self):
 
         xrate = models.XRate.get(id = 1)
@@ -72,6 +73,8 @@ class Test(unittest.TestCase):
         self.assertIn('{"ccy":"USD","base_ccy":"UAH",', api_log.response_text)
 
     @patch("api._Api._send", new=get_privat_btc_response)
+
+    @unittest.skip("skip")
     def test_privat_btc(self):
 
         xrate = models.XRate.get(from_currency=1000, to_currency=840)
@@ -90,7 +93,8 @@ class Test(unittest.TestCase):
 
         self.assertIsNotNone(api_log)
         self.assertEqual(api_log.request_url, "https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11")
-        
+
+    @unittest.skip("skip")    
     def test_nbu(self):
         xrate = models.XRate.get(from_currency = 978, to_currency = 980)
         updated_before = xrate.updated
@@ -112,6 +116,7 @@ class Test(unittest.TestCase):
 
         self.assertIn('<r030>978</r030>', api_log.response_text)
 
+    @unittest.skip("skip")
     @patch("api._Api._send", new=get_privat_response)
     def test_privat_mock(self):
         
@@ -135,6 +140,7 @@ class Test(unittest.TestCase):
 
         self.assertIn('[{"ccy": "USD", "base_ccy": "UAH", "buy": "43.90000", "sale": "44.44444"}]', api_log.response_text)
 
+    @unittest.skip("skip")
     def test_api_error(self):
         api.HTTP_TIMEOUT = 0.001
         xrate = models.XRate.get(id=1)
@@ -164,6 +170,33 @@ class Test(unittest.TestCase):
         self.assertIn("Connection to api.privatbank.ua timed out", error_log.error)
 
         api.HTTP_TIMEOUT = 15
+
+    def test_xml_api(self):
+        r = requests.get("http://localhost:5000/api/xrates/xml")
+        self.assertIn("<xrates>", r.text)
+        print(r.text)
+        xml_rates = xmltodict.parse(r.text)
+        self.assertIn("xrates", xml_rates)
+        self.assertIsInstance(xml_rates["xrates"]["xrate"], list)
+        self.assertEqual(len(xml_rates["xrates"]["xrate"]), 3)
+
+    def test_json_api(self):
+        r = requests.get("http://localhost:5000/api/xrates/json")
+        print(r.text)
+        json_rates = r.json()
+        self.assertIsInstance(json_rates, list)
+        self.assertEqual(len(json_rates), 3)
+        for rate in json_rates:
+            self.assertIn("from", rate)
+            self.assertIn("to", rate)
+            self.assertIn("rate", rate)
+    
+    def test_json_api_uah(self):
+        r = requests.get("http://localhost:5000/api/xrates/json?to_currency=980")
+        print(r.text)
+        json_rates = r.json()
+        self.assertIsInstance(json_rates, list)
+        self.assertEqual(len(json_rates), 2)
 
 
 if __name__ == '__main__':

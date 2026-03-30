@@ -52,10 +52,3 @@ class GetApiRates(BaseController):
     
     def _get_json(self, xrates):
         return jsonify([{"from": rate.from_currency, "to": rate.to_currency, "rate": rate.rate} for rate in xrates])
-
-# def get_all_rates():
-#     try:    
-#         xrates = XRate.select()
-#         return render_template("xrates.html", xrates=xrates)
-#     except Exception as ex:
-#         return make_response(str(ex), 500)
