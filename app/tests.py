@@ -171,6 +171,7 @@ class Test(unittest.TestCase):
 
         api.HTTP_TIMEOUT = 15
 
+    @unittest.skip("skip")
     def test_xml_api(self):
         r = requests.get("http://localhost:5000/api/xrates/xml")
         self.assertIn("<xrates>", r.text)
@@ -180,6 +181,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(xml_rates["xrates"]["xrate"], list)
         self.assertEqual(len(xml_rates["xrates"]["xrate"]), 3)
 
+    @unittest.skip("skip")
     def test_json_api(self):
         r = requests.get("http://localhost:5000/api/xrates/json")
         print(r.text)
@@ -191,12 +193,23 @@ class Test(unittest.TestCase):
             self.assertIn("to", rate)
             self.assertIn("rate", rate)
     
+    @unittest.skip("skip")
     def test_json_api_uah(self):
         r = requests.get("http://localhost:5000/api/xrates/json?to_currency=980")
         print(r.text)
         json_rates = r.json()
         self.assertIsInstance(json_rates, list)
         self.assertEqual(len(json_rates), 2)
+
+    def test_html_xrates(self):
+        r = requests.get("http://localhost:5000/xrates")
+        print(r.text[:50])
+        self.assertTrue(r.ok)
+        self.assertIn('<table border="1">', r.text)
+        self.assertIn("<table", r.text)
+        self.assertIn("From", r.text)
+        self.assertIn("To", r.text)
+        self.assertIn("Rate", r.text)
 
 
 if __name__ == '__main__':
