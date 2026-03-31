@@ -1,4 +1,5 @@
 from flask import render_template, make_response, jsonify, request, redirect, url_for
+from datetime import datetime
 import xmltodict
 import api
 
@@ -80,3 +81,21 @@ class ViewLogs(BaseController):
         page = int(self.request.args.get("page", 1))
         logs = ApiLog.select().paginate(page, 10).order_by(ApiLog.id.desc())
         return render_template("logs.html", logs=logs)
+    
+class EditRate(BaseController):
+    def _call(self, from_currency, to_currency):
+        if self.request.method == "GET":
+            return render_template("rate_edit.html", from_currency=from_currency, to_currency=to_currency)
+        
+        #POST request is got
+        print(request.form)
+        if "new_rate" not in request.form:
+            raise Exception("new_rate parametr is required")
+        if not request.form["new_rate"]:
+            raise Exception("new_rate must be not empty")
+        
+        upd_count = (XRate.update({XRate.rate: float(request.form["new_rate"]), XRate.updated: datetime.now()})
+                     .where(XRate.from_currency == from_currency,
+                            XRate.to_currency == to_currency).execute())
+        print("upd_count", upd_count)
+        return redirect(url_for("view_rates"))
