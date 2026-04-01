@@ -37,7 +37,7 @@ def update_xrates(from_currency=None, to_currency=None):
 def edit_xrate(from_currency, to_currency):
     return controllers.EditRate().call(from_currency, to_currency)
 
-@app.route("/logs")
+@app.route("/logs/<log_type>")
 @check_ip
-def view_logs():
-    return controllers.ViewLogs().call()
+def view_logs(log_type):
+    return controllers.ViewLogs().call(log_type)
