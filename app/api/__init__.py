@@ -3,7 +3,7 @@ import requests, traceback
 import importlib
 from models import XRate, ApiLog, ErrorLog, peewee_datetime
 
-logging.config.dictConfig(LOGGING)
+#logging.config.dictConfig(LOGGING)
 
 def update_rate(from_currency, to_currency):
     xrate = XRate.select().where(XRate.from_currency == from_currency,
